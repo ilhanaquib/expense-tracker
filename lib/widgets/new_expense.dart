@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/models/expense.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
+import 'package:expense_tracker/database_helper.dart';
 
 final formatter = DateFormat.yMd();
 
@@ -39,45 +41,53 @@ class _NewExpense extends State<NewExpense> {
     });
   }
 
-  void _submitExpenseData() {
-    final enteredAmount = double.tryParse(_amountController.text);
-    final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
+void _submitExpenseData() async {
+  final enteredAmount = double.tryParse(_amountController.text);
+  final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
 
-    //validation check
-    if (_titleController.text.trim().isEmpty ||
-        amountIsInvalid ||
-        _selectedDate == null) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Invalid Input'),
-          content: const Text(
-              'Please make sure a valid title, amount, date or category is entered'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-    // add new expense to list
-    widget.onAddExpense(
-      Expense(
-          id: const Uuid().v4(),
-          title: _titleController.text,
-          amount: enteredAmount,
-          date: _selectedDate!,
-          category: category as Category),
-    );
+  // Validation check
+  if (_titleController.text.trim().isEmpty ||
+      amountIsInvalid ||
+      _selectedDate == null) {
+    // Show error dialog
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Expense added succesfully'),
+        title: const Text('Invalid Input'),
+        content: const Text(
+            'Please make sure a valid title, amount, date, or category is entered'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+
+  // Create an Expense object
+  final expense = Expense(
+    id: const Uuid().v4(),
+    title: _titleController.text,
+    amount: enteredAmount!,
+    date: _selectedDate!,
+    category: category!,
+  );
+
+  // Save the expense to the database
+  try {
+    final savedExpense = await DatabaseHelper.instance.create(expense);
+    print('Expense saved: $savedExpense');
+
+    // Show success dialog
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Expense added successfully'),
         actions: [
           TextButton(
             onPressed: () {
@@ -89,7 +99,26 @@ class _NewExpense extends State<NewExpense> {
         ],
       ),
     );
+  } catch (e) {
+    // Handle database error
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Error'),
+        content: Text('Failed to add expense: $e'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
+}
+
 
   @override
   void dispose() {

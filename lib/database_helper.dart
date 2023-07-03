@@ -7,6 +7,7 @@ import 'package:expense_tracker/models/expense.dart';
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
 
+  //this is variable to store database
   static Database? _database;
 
   DatabaseHelper._init();
@@ -17,6 +18,7 @@ class DatabaseHelper {
     return _database!;
   }
 
+  //initialize database
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
@@ -24,8 +26,9 @@ class DatabaseHelper {
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
+  //create table
   Future _createDB(Database db, int version) async {
-    final idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    final idType = 'TEXT PRIMARY KEY';
     final doubleType = 'REAL NOT NULL';
     final textType = 'TEXT NOT NULL';
 
@@ -35,7 +38,7 @@ class DatabaseHelper {
       ${ExpenseFields.title} $textType,
       ${ExpenseFields.amount} $doubleType,
       ${ExpenseFields.date} $textType,
-      ${ExpenseFields.category} $textType,
+      ${ExpenseFields.category} $textType
     )
   ''');
   }
@@ -43,11 +46,15 @@ class DatabaseHelper {
   Future<Expense> create(Expense expense) async {
     final db = await instance.database;
 
-    final id = await db.insert(tableExpense, expense.toJson());
+    final expenseMap = expense.toJson();
+    final updatedExpenseMap = Map<String, dynamic>.from(expenseMap);
+    updatedExpenseMap['_category'] = expense.category.index;
+
+    final id = await db.insert(tableExpense, updatedExpenseMap);
     return expense.copy(id: id.toString());
   }
 
-  Future<Expense> readExpense(int id) async {
+  Future<Expense> readExpense(String id) async {
     final db = await instance.database;
 
     final maps = await db.query(tableExpense,
@@ -75,14 +82,14 @@ class DatabaseHelper {
     final db = await instance.database;
 
     return db.update(
-      tableExpense, 
+      tableExpense,
       expense.toJson(),
       where: '${ExpenseFields.id} = ?',
       whereArgs: [expense.id],
     );
   }
 
-  Future<int> delete(int id) async {
+  Future<int> delete(String id) async {
     final db = await instance.database;
 
     return await db.delete(

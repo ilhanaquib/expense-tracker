@@ -1,16 +1,18 @@
+import 'dart:ffi';
+
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // this section is for database
 
+// this is to name the table. table is called expense
 final String tableExpense = 'expense';
 
 class ExpenseFields {
-  static final List<String> values = [
-    id, title, amount, date, category
-  ];
+  static final List<String> values = [id, title, amount, date, category];
 
+  // this variable is to name the columns. it does not store data
   static final String id = '_id';
   static final String title = '_title';
   static final String amount = '_amount';
@@ -55,9 +57,9 @@ class Expense {
   Map<String, Object?> toJson() => {
         ExpenseFields.id: id,
         ExpenseFields.title: title,
-        ExpenseFields.amount: amount,
+        ExpenseFields.amount: amount.toString(),
         ExpenseFields.date: date.toIso8601String(),
-        ExpenseFields.category: category,
+        ExpenseFields.category: category.index,
       };
 
   Expense copy({
@@ -74,14 +76,14 @@ class Expense {
         date: date ?? this.date,
         category: category ?? this.category,
       );
-  
+
   static Expense fromJson(Map<String, Object?> json) => Expense(
-    id: json[ExpenseFields.id] as String,
-    title: json[ExpenseFields.title] as String,
-    amount: json[ExpenseFields.amount] as double,
-    date: DateTime.parse(json[ExpenseFields.date] as String) ,
-    category: json[ExpenseFields.category] as Category,
-  );
+        id: json[ExpenseFields.id] as String,
+        title: json[ExpenseFields.title] as String,
+        amount: double.parse(json[ExpenseFields.amount] as String),
+        date: DateTime.parse(json[ExpenseFields.date] as String),
+        category: Category.values[int.parse(json[ExpenseFields.category] as String)],
+      );
 }
 
 class ExpenseBucket {
