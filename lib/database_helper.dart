@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:expense_tracker/models/expense.dart';
@@ -72,7 +71,7 @@ class DatabaseHelper {
   Future<List<Expense>> readAllExpense() async {
     final db = await instance.database;
 
-    final orderBy = '${ExpenseFields.date} ASC';
+    // final orderBy = '${ExpenseFields.date} ASC';
     final result = await db.query(tableExpense);
 
     return result.map((json) => Expense.fromJson(json)).toList();

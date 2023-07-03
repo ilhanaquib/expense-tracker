@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -59,8 +57,12 @@ class Expense {
         ExpenseFields.title: title,
         ExpenseFields.amount: amount.toString(),
         ExpenseFields.date: date.toIso8601String(),
-        ExpenseFields.category: category.index,
+        ExpenseFields.category: categoryToString(category),
       };
+
+  String categoryToString(Category category) {
+    return category.toString().split('.').last;
+  }
 
   Expense copy({
     String? id,
@@ -80,9 +82,10 @@ class Expense {
   static Expense fromJson(Map<String, Object?> json) => Expense(
         id: json[ExpenseFields.id] as String,
         title: json[ExpenseFields.title] as String,
-        amount: double.parse(json[ExpenseFields.amount] as String),
+        amount: json[ExpenseFields.amount] as double,
         date: DateTime.parse(json[ExpenseFields.date] as String),
-        category: Category.values[int.parse(json[ExpenseFields.category] as String)],
+        category:
+            Category.values[int.parse(json[ExpenseFields.category] as String)],
       );
 }
 

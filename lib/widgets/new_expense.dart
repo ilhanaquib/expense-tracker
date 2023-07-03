@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/models/expense.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/database_helper.dart';
 
@@ -73,7 +72,7 @@ void _submitExpenseData() async {
   final expense = Expense(
     id: const Uuid().v4(),
     title: _titleController.text,
-    amount: enteredAmount!,
+    amount: enteredAmount,
     date: _selectedDate!,
     category: category!,
   );
@@ -117,6 +116,7 @@ void _submitExpenseData() async {
       ),
     );
   }
+
 }
 
 
