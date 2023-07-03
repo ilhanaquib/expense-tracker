@@ -2,6 +2,24 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+// this section is for database
+
+final String tableExpense = 'expense';
+
+class ExpenseFields {
+  static final List<String> values = [
+    id, title, amount, date, category
+  ];
+
+  static final String id = '_id';
+  static final String title = '_title';
+  static final String amount = '_amount';
+  static final String date = '_date';
+  static final String category = '_category';
+}
+
+//------------------------------
+
 final formatter = DateFormat.yMd();
 
 const uuid = Uuid();
@@ -17,11 +35,12 @@ const categoryIcons = {
 
 class Expense {
   Expense({
+    required this.id,
     required this.title,
     required this.amount,
     required this.date,
     required this.category,
-  }) : id = uuid.v4();
+  });
 
   final String id;
   final String title;
@@ -32,13 +51,46 @@ class Expense {
   String get formattedDate {
     return formatter.format(date);
   }
+
+  Map<String, Object?> toJson() => {
+        ExpenseFields.id: id,
+        ExpenseFields.title: title,
+        ExpenseFields.amount: amount,
+        ExpenseFields.date: date.toIso8601String(),
+        ExpenseFields.category: category,
+      };
+
+  Expense copy({
+    String? id,
+    String? title,
+    double? amount,
+    DateTime? date,
+    Category? category,
+  }) =>
+      Expense(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        amount: amount ?? this.amount,
+        date: date ?? this.date,
+        category: category ?? this.category,
+      );
+  
+  static Expense fromJson(Map<String, Object?> json) => Expense(
+    id: json[ExpenseFields.id] as String,
+    title: json[ExpenseFields.title] as String,
+    amount: json[ExpenseFields.amount] as double,
+    date: DateTime.parse(json[ExpenseFields.date] as String) ,
+    category: json[ExpenseFields.category] as Category,
+  );
 }
 
 class ExpenseBucket {
   const ExpenseBucket({required this.category, required this.expenses});
 
   ExpenseBucket.forCategory(List<Expense> allExpenses, this.category)
-      : expenses = allExpenses.where((expense) => expense.category == category).toList();
+      : expenses = allExpenses
+            .where((expense) => expense.category == category)
+            .toList();
 
   final Category category;
   final List<Expense> expenses;

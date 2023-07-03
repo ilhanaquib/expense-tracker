@@ -22,18 +22,7 @@ class _ExpensesState extends State<Expenses> {
   }
 
   // dummy data
-  final List<Expense> _registeredExpenses = [
-    Expense(
-        title: 'flutter course',
-        amount: 19.99,
-        date: DateTime.now(),
-        category: Category.work),
-    Expense(
-        title: 'cinema',
-        amount: 15.49,
-        date: DateTime.now(),
-        category: Category.leisure),
-  ];
+  final List<Expense> _registeredExpenses = [];
 
   void _addExpense(Expense expense) {
     setState(() {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/models/expense.dart';
+import 'package:uuid/uuid.dart';
 
 final formatter = DateFormat.yMd();
 
@@ -66,6 +68,7 @@ class _NewExpense extends State<NewExpense> {
     // add new expense to list
     widget.onAddExpense(
       Expense(
+          id: const Uuid().v4(),
           title: _titleController.text,
           amount: enteredAmount,
           date: _selectedDate!,
